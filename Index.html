@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI Calculator | Invest Smart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FFFFFF;
+            color: #1A1A1A;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: #FFFFFF;
+            border: 1px solid #CCCCCC;
+            border-radius: 16px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: #28A745;
+            border-bottom: 2px solid #28A745;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #CCCCCC;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #28A745;
+        }
+
+        .error {
+            color: #DC3545;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #00FF66;
+            color: #000000;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: block;
+            animation: fadeInOut 2.5s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(100px); }
+            10% { opacity: 1; transform: translateX(0); }
+            90% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(100px); }
+        }
+
+        .tier-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .auto-display {
+            background-color: #f0fdf4;
+            border-left: 4px solid #28A745;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+
+        .result-box {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-box p {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #28A745;
+        }
+
+        .btn-primary {
+            background-color: #28A745;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            width: 200px;
+            margin: 1rem auto;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .bold-header {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #1A1A1A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="successPopup" class="popup">Your details have been saved</div>
+
+        <div class="section">
+            <h2>Your Information</h2>
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="name" placeholder="John Doe">
+                <div class="error" id="nameError">Name must contain only letters and spaces (minimum 2 characters)</div>
+            </div>
+            <div class="form-group">
+                <label>Phone *</label>
+                <input type="tel" id="phone" placeholder="1234567890">
+                <div class="error" id="phoneError">Phone must be 10-15 digits, numbers only</div>
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" id="email" placeholder="you@example.com">
+                <div class="error" id="emailError">Enter a valid email address containing @ and .</div>
+            </div>
+            <div class="form-group">
+                <label>Address *</label>
+                <input type="text" id="address" placeholder="Street, City, ZIP Code">
+                <div class="error" id="addressError">Address is required</div>
+            </div>
+            <div class="form-group">
+                <label>Age Group *</label>
+                <select id="ageGroup">
+                    <option value="">Select age group</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36-45">36-45</option>
+                    <option value="46+">46+</option>
+                </select>
+                <div class="error" id="ageError">Please select an age group</div>
+            </div>
+            <button class="btn-secondary" id="saveDetailsBtn">Save My Details</button>
+        </div>
+
+        <div class="section">
+            <div class="bold-header">ROI CALCULATOR</div>
+
+            <div class="tier-selector">
+                <label>Select Investment Tier:</label>
+                <select id="tierSelect">
+                    <option value="9.5">Standard - 9.5% monthly</option>
+                    <option value="12.5">Premium - 12.5% monthly</option>
+                    <option value="15">Gold - 15% monthly</option>
+                </select>
+            </div>
+
+            <div class="auto-display" id="autoDisplay">
+                <strong>Monthly ROI Return:</strong> <span id="monthlyRoiDisplay">$0.00</span>
+            </div>
+
+            <div class="form-group">
+                <label>Investment Amount (USD):</label>
+                <input type="number" id="investmentAmount" value="1000" min="100" max="1000000" step="100">
+            </div>
+
+            <div class="form-group">
+                <label>Investment Period (months, 1-24):</label>
+                <input type="number" id="investmentPeriod" value="6" min="1" max="24">
+            </div>
+
+            <button class="btn-primary" id="calculateBtn">Calculate ROI</button>
+
+            <div class="result-box" id="resultsBox">
+                <p>Total ROI Return (Cumulative): <span id="totalRoi" class="result-value">$0.00</span></p>
+                <p>Total Revenue (Investment + ROI): <span id="totalRevenue" class="result-value">$0.00</span></p>
+            </div>
+
+            <div class="text-center">
+                <button class="btn-secondary" id="resetBtn">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const emailInput = document.getElementById('email');
+        const addressInput = document.getElementById('address');
+        const ageGroupSelect = document.getElementById('ageGroup');
+        const saveBtn = document.getElementById('saveDetailsBtn');
+        const tierSelect = document.getElementById('tierSelect');
+        const investmentAmount = document.getElementById('investmentAmount');
+        const investmentPeriod = document.getElementById('investmentPeriod');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const monthlyRoiDisplay = document.getElementById('monthlyRoiDisplay');
+        const totalRoiSpan = document.getElementById('totalRoi');
+        const totalRevenueSpan = document.getElementById('totalRevenue');
+        const popup = document.getElementById('successPopup');
+
+        function showPopup() {
+            popup.classList.remove('show');
+            void popup.offsetWidth;
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 2500);
+        }
+
+        function validateName() {
+            const name = nameInput.value.trim();
+            const regex = /^[A-Za-z\s]{2,}$/;
+            const isValid = regex.test(name);
+            document.getElementById('nameError').classList.toggle('show', !isValid);
+            return isValid;
+        }
+
+        function validatePhone() {
+            const phone = phoneInput.value.trim();
+            const regex = /^\d{10,15}$/;
+            const isValid = regex.test(phone);
+            document.getElementById('phoneError').classList.toggle('show', !isValid);
+            return isValid;
+        }
+
+        function validateEmail() {
+            const email = emailInput.value.trim();
+            const isValid = email.includes('@') && email.includes('.') && email.length > 5;
+            document.getElementById('emailError').classList.toggle('show', !isValid);
+            return isValid;
+        }
+
+        function validateAddress() {
+            const address = addressInput.value.trim();
+            const isValid = address.length > 0;
+            document.getElementById('addressError').classList.toggle('show', !isValid);
+            return isValid;
+        }
+
+        function validateAgeGroup() {
+            const age = ageGroupSelect.value;
+            const isValid = age !== '';
+            document.getElementById('ageError').classList.toggle('show', !isValid);
+            return isValid;
+        }
+
+        function validateAllFields() {
+            const isNameValid = validateName();
+            const isPhoneValid = validatePhone();
+            const isEmailValid = validateEmail();
+            const isAddressValid = validateAddress();
+            const isAgeValid = validateAgeGroup();
+            return isNameValid && isPhoneValid && isEmailValid && isAddressValid && isAgeValid;
+        }
+
+        function saveDetails() {
+            if (validateAllFields()) {
+                const userData = {
+                    name: nameInput.value.trim(),
+                    phone: phoneInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    address: addressInput.value.trim(),
+                    ageGroup: ageGroupSelect.value
+                };
+                localStorage.setItem('investorDetails', JSON.stringify(userData));
+                showPopup();
+            }
+        }
+
+        function loadSavedDetails() {
+            const saved = localStorage.getItem('investorDetails');
+            if (saved) {
+                const data = JSON.parse(saved);
+                nameInput.value = data.name || '';
+                phoneInput.value = data.phone || '';
+                emailInput.value = data.email || '';
+                addressInput.value = data.address || '';
+                ageGroupSelect.value = data.ageGroup || '';
+            }
+        }
+
+        function updateMonthlyRoi() {
+            const monthlyRate = parseFloat(tierSelect.value) / 100;
+            const amount = parseFloat(investmentAmount.value);
+            if (isNaN(amount) || amount < 100) {
+                monthlyRoiDisplay.textContent = '$0.00';
+                return;
+            }
+            const monthlyRoi = amount * monthlyRate;
+            monthlyRoiDisplay.textContent = '$' + monthlyRoi.toFixed(2);
+        }
+
+        function calculateTotal() {
+            const monthlyRate = parseFloat(tierSelect.value) / 100;
+            const amount = parseFloat(investmentAmount.value);
+            const months = parseInt(investmentPeriod.value);
+
+            if (isNaN(amount) || amount < 100) {
+                alert('Please enter a valid investment amount (minimum $100)');
+                return;
+            }
+            if (isNaN(months) || months < 1 || months > 24) {
+                alert('Please enter a valid investment period (1-24 months)');
+                return;
+            }
+
+            const totalRoi = amount * monthlyRate * months;
+            const totalRevenueValue = amount + totalRoi;
+
+            totalRoiSpan.textContent = '$' + totalRoi.toFixed(2);
+            totalRevenueSpan.textContent = '$' + totalRevenueValue.toFixed(2);
+        }
+
+        function resetCalculator() {
+            investmentAmount.value = '1000';
+            investmentPeriod.value = '6';
+            tierSelect.value = '9.5';
+            updateMonthlyRoi();
+            totalRoiSpan.textContent = '$0.00';
+            totalRevenueSpan.textContent = '$0.00';
+        }
+
+        saveBtn.addEventListener('click', saveDetails);
+        calculateBtn.addEventListener('click', calculateTotal);
+        resetBtn.addEventListener('click', resetCalculator);
+        tierSelect.addEventListener('change', updateMonthlyRoi);
+        investmentAmount.addEventListener('input', updateMonthlyRoi);
+        investmentPeriod.addEventListener('input', updateMonthlyRoi);
+
+        nameInput.addEventListener('input', validateName);
+        phoneInput.addEventListener('input', validatePhone);
+        emailInput.addEventListener('input', validateEmail);
+        addressInput.addEventListener('input', validateAddress);
+        ageGroupSelect.addEventListener('change', validateAgeGroup);
+
+        loadSavedDetails();
+        updateMonthlyRoi();
+        calculateTotal();
+    </script>
+</body>
+</html>
